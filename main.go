@@ -26,7 +26,8 @@ func worker(id int, jobs <-chan string, wg *sync.WaitGroup) {
 }
 
 func main() {
-    hostname_flag := flag.Int("H", false, "Display hostname")
+    
+    hostname_flag := flag.Bool("H", false, "Display hostname")
     concurrency := flag.Int("c", 20, "Number of concurrent workers")
     flag.Parse()
 
