@@ -18,6 +18,10 @@ localhost
 
 cat hosts.txt | iprobe
 127.0.0.1
+
+cat hosts.txt | iprobe -H
+localhost
+127.0.0.1
 ```
 
 
