@@ -10,7 +10,6 @@ import (
 
 func main() {
 	ipv6Flag := flag.Bool("ipv6", false, "Resolve IPv6 addresses")
-
 	flag.Parse()
 
 	scanner := bufio.NewScanner(os.Stdin)
@@ -19,7 +18,7 @@ func main() {
 		hostname := scanner.Text()
 
 		// Resolve the hostname to IP addresses based on the flag
-		var ipAddresses []string
+		var ipAddresses []net.IP
 		var err error
 
 		if *ipv6Flag {
