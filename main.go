@@ -11,9 +11,10 @@ import (
 
 func worker(id int, jobs <-chan string, wg *sync.WaitGroup) {
     defer wg.Done()
-    for j := range jobs {
-        ips, _ := net.LookupIP(j)
+    for hostname := range jobs {
+        ips, _ := net.LookupIP(hostname)
         for _, ip := range ips {
+            //check if ip-v4 and print
             fmt.Println(ip)
         }
     }
