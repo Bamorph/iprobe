@@ -26,8 +26,9 @@ func worker(id int, jobs <-chan string, ipWG *sync.WaitGroup) {
     }
 }
 
+var hostnameFlag bool
+
 func main() {
-    var hostnameFlag bool
     flag.BoolVar(&hostnameFlag, "H", false, "Display hostname")
     concurrency := flag.Int("c", 20, "Number of concurrent workers")
     flag.Parse()
