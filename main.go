@@ -11,7 +11,7 @@ import (
 )
 
 func main() {
-	ipv6Flag := flag.Bool("ipv6", false, "Resolve IPv6 addresses")
+	ipv6Flag := flag.Bool("v6", false, "Resolve IPv6 addresses")
 	concurrencyFlag := flag.Int("c", 20, "Set the concurrency level")
 	verboseFlag := flag.Bool("v", false, "Output errors to stderr")
 	flag.Parse()
