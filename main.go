@@ -6,45 +6,81 @@ import (
 	"fmt"
 	"net"
 	"os"
+	"sync"
 )
 
 func main() {
-	ipv6Flag := flag.Bool("ipv6", false, "Resolve IPv6 addresses")
+	ipv6Flag := flag.Bool("v6", false, "Resolve IPv6 addresses")
+	concurrencyFlag := flag.Int("c", 20, "Set the concurrency level")
 	flag.Parse()
 
 	scanner := bufio.NewScanner(os.Stdin)
 
-	for scanner.Scan() {
-		hostname := scanner.Text()
+	// Create a worker pool with the specified concurrency
+	workerPool := make(chan struct{}, *concurrencyFlag)
+	var wg sync.WaitGroup
 
-		// Resolve the hostname to IP addresses based on the flag
-		var ipAddresses []net.IP
-		var err error
+	for i := 0; i < *concurrencyFlag; i++ {
+		wg.Add(1)
 
-		if *ipv6Flag {
-			ipAddresses, err = net.LookupIP(hostname)
-		} else {
-			ipAddresses, err = net.LookupIP(hostname)
-		}
+		go func() {
+			defer wg.Done()
 
-		if err != nil {
-			// Handle errors and consider security implications
-			fmt.Printf("Error resolving %s: %v\n", hostname, err)
-			continue
-		}
+			for {
+				// Read a hostname from the scanner
+				hostname, err := readHostname(scanner)
+				if err != nil {
+					// End of input, no more hostnames to process
+					return
+				}
 
-		// Filter and print the IP addresses
-		for _, ip := range ipAddresses {
-			// Filter for IPv4 or IPv6 based on the flag
-			if !*ipv6Flag && ip.To4() == nil {
-				continue // Skip IPv6 if not requested
+				// Limit concurrency by adding to the worker pool
+				workerPool <- struct{}{}
+
+				go func(hostname string) {
+					defer func() {
+						<-workerPool // Release a worker when done
+					}()
+
+					// Resolve the hostname to IP addresses based on the flag
+					var ipAddresses []net.IP
+					var err error
+
+					if *ipv6Flag {
+						ipAddresses, err = net.LookupIP(hostname)
+					} else {
+						ipAddresses, err = net.LookupIP(hostname)
+					}
+
+					if err != nil {
+						// Handle errors and consider security implications
+						fmt.Printf("Error resolving %s: %v\n", hostname, err)
+						return
+					}
+
+					// Filter and print the IP addresses
+					for _, ip := range ipAddresses {
+						// Filter for IPv4 or IPv6 based on the flag
+						if !*ipv6Flag && ip.To4() == nil {
+							continue // Skip IPv6 if not requested
+						}
+						fmt.Println(ip)
+					}
+				}(hostname)
 			}
-			fmt.Println(ip)
-		}
+		}()
 	}
 
-	if err := scanner.Err(); err != nil {
-		// Handle any errors related to reading input
-		fmt.Printf("Error reading input: %v\n", err)
+	wg.Wait()
+}
+
+// readHostname reads a hostname from the scanner and handles errors.
+func readHostname(scanner *bufio.Scanner) (string, error) {
+	if scanner.Scan() {
+		return scanner.Text(), nil
 	}
+	if scanner.Err() != nil {
+		return "", scanner.Err()
+	}
+	return "", fmt.Errorf("End of input")
 }
