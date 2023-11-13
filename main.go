@@ -9,25 +9,26 @@ import (
     "sync"
 )
 
+var hostnameFlag bool
+
 func worker(id int, jobs <-chan string, wg *sync.WaitGroup) {
     defer wg.Done()
     for hostname := range jobs {
         ips, _ := net.LookupIP(hostname)
         for _, ip := range ips {
             // check if ip-v4 and print
-            if hostname_flag {
-            fmt.Println(hostname)
+            if hostnameFlag {
+                fmt.Println(hostname)
             }
             if ip.To4() != nil {
-            fmt.Println(ip)
+                fmt.Println(ip)
             }
         }
     }
 }
 
 func main() {
-    
-    hostname_flag := flag.Bool("H", false, "Display hostname")
+    flag.BoolVar(&hostnameFlag, "H", false, "Display hostname")
     concurrency := flag.Int("c", 20, "Number of concurrent workers")
     flag.Parse()
 
