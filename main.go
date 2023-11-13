@@ -9,17 +9,16 @@ import (
     "sync"
 )
 
-var hostnameFlag bool
 
-func worker(id int, jobs <-chan string, wg *sync.WaitGroup) {
-    defer wg.Done()
+func worker(id int, jobs <-chan string, ipWG *sync.WaitGroup) {
+    defer ipWG.Done()
     for hostname := range jobs {
         ips, _ := net.LookupIP(hostname)
         for _, ip := range ips {
-            // check if ip-v4 and print
             if hostnameFlag {
                 fmt.Println(hostname)
             }
+            // only display IPv4 addresses
             if ip.To4() != nil {
                 fmt.Println(ip)
             }
@@ -28,16 +27,17 @@ func worker(id int, jobs <-chan string, wg *sync.WaitGroup) {
 }
 
 func main() {
+    var hostnameFlag bool
     flag.BoolVar(&hostnameFlag, "H", false, "Display hostname")
     concurrency := flag.Int("c", 20, "Number of concurrent workers")
     flag.Parse()
 
     jobs := make(chan string)
-    var wg sync.WaitGroup
+    var ipWG sync.WaitGroup
 
     for w := 1; w <= *concurrency; w++ {
         wg.Add(1)
-        go worker(w, jobs, &wg)
+        go worker(w, jobs, &ipWG)
     }
 
     scanner := bufio.NewScanner(os.Stdin)
@@ -46,5 +46,5 @@ func main() {
     }
     close(jobs)
 
-    wg.Wait()
+    ipWG.Wait()
 }
