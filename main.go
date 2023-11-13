@@ -7,11 +7,13 @@ import (
 	"net"
 	"os"
 	"sync"
+	"io"
 )
 
 func main() {
-	ipv6Flag := flag.Bool("v6", false, "Resolve IPv6 addresses")
+	ipv6Flag := flag.Bool("ipv6", false, "Resolve IPv6 addresses")
 	concurrencyFlag := flag.Int("c", 20, "Set the concurrency level")
+	verboseFlag := flag.Bool("v", false, "Output errors to stderr")
 	flag.Parse()
 
 	scanner := bufio.NewScanner(os.Stdin)
@@ -54,8 +56,9 @@ func main() {
 
 					if err != nil {
 						// Handle errors and consider security implications
-						// I don't want errors in my output
-						//fmt.Printf("Error resolving %s: %v\n", hostname, err)
+						if *verboseFlag {
+							fmt.Fprintf(os.Stderr, "Error resolving %s: %v\n", hostname, err)
+						}
 						return
 					}
 
@@ -83,5 +86,5 @@ func readHostname(scanner *bufio.Scanner) (string, error) {
 	if scanner.Err() != nil {
 		return "", scanner.Err()
 	}
-	return "", fmt.Errorf("End of input")
+	return "", io.EOF
 }
