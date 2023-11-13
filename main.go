@@ -15,7 +15,9 @@ func worker(id int, jobs <-chan string, wg *sync.WaitGroup) {
         ips, _ := net.LookupIP(hostname)
         for _, ip := range ips {
             // check if ip-v4 and print
-            // fmt.Println(hostname)
+            if hostname_flag {
+            fmt.Println(hostname)
+            }
             if ip.To4() != nil {
             fmt.Println(ip)
             }
@@ -24,6 +26,7 @@ func worker(id int, jobs <-chan string, wg *sync.WaitGroup) {
 }
 
 func main() {
+    hostname_flag := flag.Int("H", false, "Display hostname")
     concurrency := flag.Int("c", 20, "Number of concurrent workers")
     flag.Parse()
 
