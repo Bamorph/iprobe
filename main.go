@@ -36,7 +36,7 @@ func main() {
     var ipWG sync.WaitGroup
 
     for w := 1; w <= *concurrency; w++ {
-        wg.Add(1)
+        ipWG.Add(1)
         go worker(w, jobs, &ipWG)
     }
 
