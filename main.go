@@ -54,7 +54,8 @@ func main() {
 
 					if err != nil {
 						// Handle errors and consider security implications
-						fmt.Printf("Error resolving %s: %v\n", hostname, err)
+						// I don't want errors in my output
+						//fmt.Printf("Error resolving %s: %v\n", hostname, err)
 						return
 					}
 
