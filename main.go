@@ -34,7 +34,7 @@ func worker(id int, jobs <-chan string, ipWG *sync.WaitGroup) {
 
 func removePrefixes(input string) string {
 	// Remove "http://", "https://", and "www." prefixes
-	prefixes := []string{"http://", "https://", "www."}
+	prefixes := []string{"http://", "https://", "www.", "ftp://"}
 	for _, prefix := range prefixes {
 		if strings.HasPrefix(input, prefix) {
 			input = strings.TrimPrefix(input, prefix)
