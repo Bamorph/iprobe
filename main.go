@@ -15,11 +15,11 @@ func worker(id int, jobs <-chan string, ipWG *sync.WaitGroup) {
 	for input := range jobs {
 		// Remove prefixes like "http://", "https://", and "www."
 		hostname := removePrefixes(input)
-		ips, err := net.LookupIP(hostname)
-		if err != nil {
-			fmt.Printf("Error looking up IP for %s: %v\n", hostname, err)
-			continue
-		}
+		ips, _ := net.LookupIP(hostname)
+		// if err != nil {
+		//	fmt.Printf("Error looking up IP for %s: %v\n", hostname, err)
+		//	continue
+		// }
 		for _, ip := range ips {
 			if hostnameFlag {
 				fmt.Println(hostname)
