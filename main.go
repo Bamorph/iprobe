@@ -5,31 +5,21 @@ import (
 	"flag"
 	"fmt"
 	"net"
-	"net/url"
 	"os"
+	"strings"
 	"sync"
 )
 
 func worker(id int, jobs <-chan string, ipWG *sync.WaitGroup) {
 	defer ipWG.Done()
 	for input := range jobs {
-		// Parse the input as a URL
-		u, err := url.Parse(input)
-		if err != nil {
-			fmt.Printf("Error parsing URL %s: %v\n", input, err)
-			continue
-		}
-
-		// Get the host from the URL
-		hostname := u.Hostname()
-
-		// Perform DNS lookup for the hostname
+		// Remove prefixes like "http://", "https://", and "www."
+		hostname := removePrefixes(input)
 		ips, err := net.LookupIP(hostname)
 		if err != nil {
 			fmt.Printf("Error looking up IP for %s: %v\n", hostname, err)
 			continue
 		}
-
 		for _, ip := range ips {
 			if hostnameFlag {
 				fmt.Println(hostname)
@@ -40,6 +30,17 @@ func worker(id int, jobs <-chan string, ipWG *sync.WaitGroup) {
 			}
 		}
 	}
+}
+
+func removePrefixes(input string) string {
+	// Remove "http://", "https://", and "www." prefixes
+	prefixes := []string{"http://", "https://", "www."}
+	for _, prefix := range prefixes {
+		if strings.HasPrefix(input, prefix) {
+			input = strings.TrimPrefix(input, prefix)
+		}
+	}
+	return input
 }
 
 var hostnameFlag bool
